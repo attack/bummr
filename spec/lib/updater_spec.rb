@@ -14,6 +14,7 @@ describe Bummr::Updater do
   let(:installed) { outdated_gems[0][:installed] }
   let(:intermediate_version) { "0.3.4" }
   let(:update_cmd) { "bundle update #{gem[:name]}" }
+  let(:git) { Bummr::Git.instance }
 
   describe "#update_gems" do
     it "calls update_gem on each gem" do
@@ -51,10 +52,11 @@ describe Bummr::Updater do
         allow(updater).to receive(:system).with(update_cmd)
         allow(updater).to receive(:updated_version_for).with(gem).and_return installed
         allow(updater).to receive(:log)
+        allow(git).to receive(:commit)
 
         updater.update_gem(gem, 0)
 
-        expect(updater).to_not have_received(:system).with /git commit/
+        expect(git).to_not have_received(:commit)
       end
     end
 
@@ -78,15 +80,14 @@ describe Bummr::Updater do
 
       it "commits" do
         commit_message =
-          "'Update #{gem[:name]} from #{gem[:installed]} to #{intermediate_version}'"
+          "Update #{gem[:name]} from #{gem[:installed]} to #{intermediate_version}"
         allow(updater).to receive(:system)
         allow(updater).to receive(:log)
+        allow(git).to receive(:commit)
 
         updater.update_gem(gem, 0)
 
-        expect(updater).to have_received(:system).with(
-          "git commit -am #{commit_message}"
-        )
+        expect(git).to have_received(:commit).with(commit_message)
       end
     end
 
@@ -111,12 +112,11 @@ describe Bummr::Updater do
           "Update #{gem[:name]} from #{gem[:installed]} to #{gem[:newest]}"
         allow(updater).to receive(:system)
         allow(updater).to receive(:log)
+        allow(git).to receive(:commit)
 
         updater.update_gem(gem, 0)
 
-        expect(updater).to have_received(:system).with(
-          "git commit -am '#{commit_message}'"
-        )
+        expect(git).to have_received(:commit).with(commit_message)
       end
     end
   end
