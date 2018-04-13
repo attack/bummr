@@ -65,6 +65,19 @@ describe Bummr::Git do
     end
   end
 
+  describe "#rebase" do
+    it "runs git rebase to the given sha" do
+      git = stub_git
+      sha = "b39dcd8"
+
+      git.rebase(sha)
+
+      expect(git).to have_received(:system).with(
+        "git rebase #{BASE_BRANCH}"
+      )
+    end
+  end
+
   describe "#message" do
     it "displays the commit message for a given sha" do
       git = stub_git
