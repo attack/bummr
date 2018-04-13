@@ -14,28 +14,23 @@ module Bummr
     desc "update", "Update outdated gems, run tests, bisect if tests fail"
     method_option :all, type: :boolean, default: false
     method_option :group, type: :string
+    method_option :headless, type: :boolean, default: false
     def update
-      ask_questions
-
-      if yes? "Are you ready to use Bummr? (y/n)"
-        check
-        log("Bummr update initiated #{Time.now}")
-        system("bundle")
-
-        outdated_gems = Bummr::Outdated.instance.outdated_gems(
-          all_gems: options[:all], group: options[:group]
+      if options[:headless]
+        update_outdated_gems(
+          all_gems: options[:all], group: options[:group], headless: options[:headless]
         )
-
-        if outdated_gems.empty?
-          puts "No outdated gems to update".color(:green)
-        else
-          Bummr::Updater.new(outdated_gems).update_gems
-
-          git.rebase_interactive(BASE_BRANCH)
-          test
-        end
       else
-        puts "Thank you!".color(:green)
+        ask_questions
+
+        if yes? "Are you ready to use Bummr? (y/n)"
+          check
+          update_outdated_gems(
+            all_gems: options[:all], group: options[:group], headless: options[:headless]
+          )
+        else
+          puts "Thank you!".color(:green)
+        end
       end
     end
 
@@ -72,6 +67,29 @@ module Bummr
       puts "- Have locked any Gem version that you don't wish to update in your Gemfile"
       puts "- It is recommended that you lock your versions of `ruby` and `rails` in your `Gemfile`"
       puts "Your test command is: '#{TEST_COMMAND}'"
+    end
+
+    def update_outdated_gems(all_gems:, group:, headless:)
+      log("Bummr update initiated #{Time.now}")
+      system("bundle")
+
+      outdated_gems = Bummr::Outdated.instance.outdated_gems(
+        all_gems: all_gems, group: group
+      )
+
+      if outdated_gems.empty?
+        puts "No outdated gems to update".color(:green)
+      else
+        Bummr::Updater.new(outdated_gems).update_gems
+
+        if headless
+          git.rebase(BASE_BRANCH)
+        else
+          git.rebase_interactive(BASE_BRANCH)
+        end
+
+        test
+      end
     end
   end
 end

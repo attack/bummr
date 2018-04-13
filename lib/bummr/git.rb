@@ -20,6 +20,10 @@ module Bummr
       system("git rebase -i #{BASE_BRANCH}")
     end
 
+    def rebase(sha)
+      system("git rebase #{BASE_BRANCH}")
+    end
+
     def message(sha)
       `git log --pretty=format:'%s' -n 1 #{sha}`
     end
