@@ -78,15 +78,16 @@ describe Bummr::Updater do
         expect(updater).to have_received(:log).with not_latest_message
       end
 
-      it "commits" do
+      it "commits gem related files" do
         commit_message =
           "Update #{gem[:name]} from #{gem[:installed]} to #{intermediate_version}"
         allow(updater).to receive(:system)
         allow(updater).to receive(:log)
-        allow(git).to receive(:commit)
+        allow(git).to receive_messages([:commit, :add])
 
         updater.update_gem(gem, 0)
 
+        expect(git).to have_received(:add).with("Gemfile Gemfile.lock")
         expect(git).to have_received(:commit).with(commit_message)
       end
     end
@@ -96,15 +97,16 @@ describe Bummr::Updater do
         allow(updater).to receive(:updated_version_for).and_return newest
       end
 
-      it "commits" do
+      it "commits gem related files" do
         commit_message =
           "Update #{gem[:name]} from #{gem[:installed]} to #{gem[:newest]}"
         allow(updater).to receive(:system)
         allow(updater).to receive(:log)
-        allow(git).to receive(:commit)
+        allow(git).to receive_messages([:commit, :add])
 
         updater.update_gem(gem, 0)
 
+        expect(git).to have_received(:add).with("Gemfile Gemfile.lock")
         expect(git).to have_received(:commit).with(commit_message)
       end
     end
