@@ -1,19 +1,20 @@
 require "spec_helper"
 
 describe Bummr::Rebaser do
-  # let(:commit_message) { "test commit message" }
   let(:rebaser) { Bummr::Rebaser.instance }
+  let(:git) { Bummr::Git.instance }
   let(:sha) { "testsha" }
   let(:rebase_command) { "git rebase -X ours --onto #{sha}^ #{sha}" }
 
   before do
-    allow(rebaser).to receive(:commit_message_for).and_return "commit message"
     allow(rebaser).to receive(:log)
     allow(rebaser).to receive(:system)
   end
 
   describe "#remove_commit" do
     it "logs the bad commit" do
+      allow(git).to receive(:message).and_return("commit message")
+
       rebaser.remove_commit(sha)
 
       expect(rebaser).to have_received(:log).with(

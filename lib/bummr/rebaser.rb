@@ -5,7 +5,7 @@ module Bummr
     include Scm
 
     def remove_commit(sha)
-      log "Bad commit: #{commit_message_for(sha)}, #{sha}".color(:red)
+      log "Bad commit: #{git.message(sha)}, #{sha}".color(:red)
       log "Resetting..."
       system("git bisect reset")
 
@@ -19,12 +19,6 @@ module Bummr
         log "Please resolve conflicts, then 'git rebase --continue'."
         log "Run 'bummr test' again once the rebase is complete"
       end
-    end
-
-    private
-
-    def commit_message_for(sha)
-      `git log --pretty=format:'%s' -n 1 #{sha}`
     end
   end
 end
