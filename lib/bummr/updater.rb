@@ -1,10 +1,10 @@
 module Bummr
   class Updater
     include Log
+    include Scm
 
     def initialize(outdated_gems)
       @outdated_gems = outdated_gems
-      @git = Bummr::Git.instance
     end
 
     def update_gems
@@ -38,10 +38,6 @@ module Bummr
     def updated_version_for(gem)
       `bundle list | grep " #{gem[:name]} "`.split('(')[1].split(')')[0]
     end
-
-    private
-
-    attr_reader :git
   end
 end
 

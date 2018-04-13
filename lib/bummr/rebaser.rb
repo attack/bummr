@@ -2,6 +2,7 @@ module Bummr
   class Rebaser
     include Singleton
     include Log
+    include Scm
 
     def remove_commit(sha)
       log "Bad commit: #{commit_message_for(sha)}, #{sha}".color(:red)
