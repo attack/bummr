@@ -31,7 +31,6 @@ module Bummr
         log("#{gem[:name]} not updated from #{gem[:installed]} to latest: #{gem[:newest]}")
       end
 
-      log "Commit: #{message}".color(:green)
       git.commit(message)
     end
 
