@@ -6,7 +6,7 @@ module Bummr
     def check(fullcheck=true)
       @errors = []
 
-      check_base_branch
+      # check_base_branch
       check_log
       check_status
 
@@ -15,9 +15,7 @@ module Bummr
       end
 
       if @errors.any?
-        unless yes? "Bummr found errors! Do you want to continue anyway?".color(:red)
-          exit 0
-        end
+        exit 0
       else
         puts "Ready to run bummr.".color(:green)
       end
