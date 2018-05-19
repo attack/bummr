@@ -7,6 +7,7 @@ module Bummr
 
     def outdated_gems(options = {})
       results = []
+      skip = options[:skip] || []
 
       bundle_options =  ""
       bundle_options << " --strict" unless options[:all_gems]
@@ -17,8 +18,14 @@ module Bummr
           puts line
           gem = parse_gem_from(line)
 
-          if gem && (options[:all_gems] || gemfile_contains(gem[:name]))
+          puts "DEBUG: outdated"
+          puts "  gem: #{gem}"
+          puts "  skip: #{skip}"
+          puts "  include?: #{!skip.include?(gem[:name])}" if gem
+          if gem && !skip.include?(gem[:name]) && (options[:all_gems] || gemfile_contains(gem[:name]))
             results.push gem
+          else
+            puts "DEBUG: skipping: #{gem}"
           end
         end
       end

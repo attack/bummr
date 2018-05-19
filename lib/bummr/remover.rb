@@ -21,6 +21,11 @@ module Bummr
         "Lord Bummr\n\n"
 
       puts message.color(:yellow)
+
+      gem_match = commit_message_for(sha).match(/Update (.*) from/)
+      if gem_match
+        gem_match[1]
+      end
     end
 
     private

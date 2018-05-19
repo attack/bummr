@@ -14,12 +14,13 @@ module Bummr
     method_option :all, type: :boolean, default: false
     method_option :group, type: :string
     def update
+      @skip ||= []
       system("bundle install --quiet")
 
       log("Bummr update initiated #{Time.now}")
 
       outdated_gems = Bummr::Outdated.instance.outdated_gems(
-        all_gems: options[:all], group: options[:group]
+        all_gems: options[:all], group: options[:group], skip: @skip
       )
 
       if outdated_gems.empty?
@@ -51,15 +52,28 @@ module Bummr
     def bisect
       check(false)
 
-      bad_sha = Bummr::Bisecter.instance.bisect
-      puts "result of bisector:#{bad_sha} (#{bad_sha.class})"
-      system("git status")
+      bad_gem = Bummr::Bisecter.instance.bisect
+      puts "result of bisector: #{bad_gem}"
       system("git checkout .")
 
-      system("git rebase -p --onto #{bad_sha}^ #{bad_sha}")
-
-      puts " DEBUG: after removing sha #{bad_sha}"
+      puts " DEBUG: before hard reset to #{BASE_BRANCH}"
       system("git log --oneline -20")
+
+      system("git reset --hard #{BASE_BRANCH}")
+
+      puts " DEBUG: after hard reset"
+      system("git log --oneline -20")
+
+      if bad_gem
+        @skip << bad_gem
+        puts " DEBUG: current skip list (#{@skip})"
+        update
+      end
+
+      # system("git rebase -p --onto #{bad_sha}^ #{bad_sha}")
+
+      # puts " DEBUG: after removing sha #{bad_sha}"
+      # system("git log --oneline -20")
     end
 
     desc "remove_commit", "Remove a commit from the history"
