@@ -14,7 +14,7 @@ module Bummr
     method_option :all, type: :boolean, default: false
     method_option :group, type: :string
     def update
-      system("bundle install")
+      system("bundle install --quiet")
 
       log("Bummr update initiated #{Time.now}")
 
@@ -36,7 +36,7 @@ module Bummr
     def test
       check(false)
 
-      system "bundle install"
+      system "bundle install --quiet"
       puts "Testing the build!".color(:green)
 
       if system(TEST_COMMAND) == false
@@ -51,7 +51,15 @@ module Bummr
     def bisect
       check(false)
 
-      Bummr::Bisecter.instance.bisect
+      bad_sha = Bummr::Bisecter.instance.bisect
+      puts "result of bisector:#{bad_sha} (#{bad_sha.class})"
+      system("git status")
+      system("git checkout .")
+
+      system("git rebase -p --onto #{bad_sha}^ #{bad_sha}")
+
+      puts " DEBUG: after removing sha #{bad_sha}"
+      system("git log --oneline -20")
     end
 
     desc "remove_commit", "Remove a commit from the history"
